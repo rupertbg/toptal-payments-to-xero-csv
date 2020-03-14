@@ -1,0 +1,24 @@
+{
+  "name": "toptal-payments-to-xero-csv",
+  "version": "1.0.0",
+  "description": "Convert Toptal Payments CSV to Xero CSV",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rupertbg/toptal-payments-to-xero-csv.git"
+  },
+  "author": "Rupert Bryant-Greene <io+toptal-payments-csv@rupertbg.nz>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/rupertbg/toptal-payments-to-xero-csv/issues"
+  },
+  "homepage": "https://github.com/rupertbg/toptal-payments-to-xero-csv#readme",
+  "dependencies": {
+    "csv-parse": "^4.8.8",
+    "csv-stringify": "^5.3.6",
+    "moment": "^2.24.0"
+  }
+}
