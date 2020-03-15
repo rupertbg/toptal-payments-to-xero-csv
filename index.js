@@ -8,14 +8,14 @@ const OUTPUT_DIR = 'output';
 const FILE_EXT = '.csv'
 
 function toptal2xero(toptalRow) {
-  let xeroRow = {}
-  xeroRow['Date'] = moment(toptalRow['Transaction date'], 'MM-DD-YYYY HH:mm:ss').format('DD/MM/YYYY')
-  xeroRow['Amount'] = toptalRow['Amount']
-  xeroRow['Payee'] = ''
-  xeroRow['Description'] = toptalRow['Description']
-  xeroRow['Reference'] = toptalRow['Id']
-  xeroRow['Cheque Number'] = ''
-  return xeroRow
+  return {
+    'Date': moment(toptalRow['Transaction date'], 'MM-DD-YYYY HH:mm:ss').format('DD/MM/YYYY'),
+    'Amount': toptalRow['Amount'],
+    'Payee': '',
+    'Description': toptalRow['Description'],
+    'Reference': toptalRow['Id'],
+    'Cheque Number': ''
+  }
 }
 
 fs.readdirSync(DATA_DIR).forEach(filename => {
