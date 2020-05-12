@@ -9,42 +9,66 @@ const OUTPUT_DIR = 'output';
 const INPUT_FILE_EXT = '.xlsx'
 const OUTPUT_FILE_EXT = '.csv'
 
-function toptal2xero(toptalRow) {
-  return {
-    'Date': moment(toptalRow['Transaction date'], 'MM-DD-YYYY HH:mm:ss').format('DD/MM/YYYY'),
-    'Amount': toptalRow['Amount'],
-    'Payee': '',
-    'Description': toptalRow['Description'],
-    'Reference': toptalRow['Id'],
-    'Cheque Number': ''
+function toptal2xero(rows) {
+  let xeroRows = []
+  for (let i = 0; i < rows.length; i++) {
+    const toptalRow = rows[i]
+
+    // Convert the line item into a Xero-compatible row
+    xeroRows.push({
+      'Date': moment(toptalRow['Transaction date'], 'MM-DD-YYYY HH:mm:ss').format('DD/MM/YYYY'),
+      'Amount': toptalRow['Amount'],
+      'Payee': '',
+      'Description': toptalRow['Description'],
+      'Reference': toptalRow['Id'],
+      'Cheque Number': ''
+    })
+
+    // Catch embedded fees in line items and make a new entry for them
+    if (toptalRow['Fee']) xeroRows.push({
+      'Date': moment(toptalRow['Transaction date'], 'MM-DD-YYYY HH:mm:ss').format('DD/MM/YYYY'),
+      'Amount': toptalRow['Fee'],
+      'Payee': '',
+      'Description': `${toptalRow['Description']} - Fee`,
+      'Reference': toptalRow['Id'],
+      'Cheque Number': ''
+    })
   }
+  return xeroRows
 }
 
 fs.readdirSync(DATA_DIR).forEach(filename => {
   if (filename.toLowerCase().endsWith(INPUT_FILE_EXT)) {
+    console.log(`----------------------`)
+    console.log(`${filename}`)
 
-    // Read in file
-    const file = xlsx.readFile(`${__dirname}/${DATA_DIR}/${filename}`)
-    const csv = xlsx.utils.sheet_to_csv(file.Sheets[file.SheetNames[0]])
-    console.log(`Discovered ${filename}`)
+    try {
+      // Read in file
+      const file = xlsx.readFile(`${__dirname}/${DATA_DIR}/${filename}`)
+      const csv = xlsx.utils.sheet_to_csv(file.Sheets[file.SheetNames[0]])
 
-    // Parse the CSV
-    let rows = parse(csv, {
-      columns: true,
-      skip_empty_lines: true
-    })
+      // Parse the CSV
+      let rows = parse(csv, {
+        columns: true,
+        skip_empty_lines: true
+      })
 
-    // Transform
-    rows = rows.map(row => toptal2xero(row))
-    console.log(`Transformed ${filename}`)
+      // Transform
+      rows = toptal2xero(rows)
+      console.log(`  - Transformed`)
 
-    // Output to file
-    const csvString = stringify(rows, {
-      header: true
-    })
-    const outputFilename = `${filename.substring(0, filename.length - INPUT_FILE_EXT.length)}${OUTPUT_FILE_EXT}`
-    fs.writeFileSync(`${__dirname}/${OUTPUT_DIR}/${outputFilename}`, csvString)
-    console.log(`Wrote ${outputFilename}`);
-
+      // Output to file
+      const csvString = stringify(rows, {
+        header: true
+      })
+      const outputFilename = `${filename.substring(0, filename.length - INPUT_FILE_EXT.length)}${OUTPUT_FILE_EXT}`
+      fs.writeFileSync(`${__dirname}/${OUTPUT_DIR}/${outputFilename}`, csvString)
+      console.log(`  - Wrote CSV`);
+    } catch (e) {
+      console.error('  - Error')
+      if (e.message) console.error(`  - ${e.message}`)
+    }
   }
 });
+
+console.log(`----------------------`)
