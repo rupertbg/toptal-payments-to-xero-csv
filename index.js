@@ -9,31 +9,37 @@ const OUTPUT_DIR = 'output';
 const INPUT_FILE_EXT = '.xlsx'
 const OUTPUT_FILE_EXT = '.csv'
 
+function convertRow(row, amount, description) {
+  return {
+    'Date': moment(row['Transaction date'], 'MM-DD-YYYY HH:mm:ss').format('DD/MM/YYYY'),
+    'Amount': amount,
+    'Payee': '',
+    'Description': description,
+    'Reference': row['Id'],
+    'Cheque Number': ''
+  }
+}
+
 function toptal2xero(rows) {
   let xeroRows = []
   for (let i = 0; i < rows.length; i++) {
-    const toptalRow = rows[i]
+    const row = rows[i]
+    // Ignore zero-rated items
+    if (!parseFloat(row['Fee']) && !parseFloat(row['Amount']) && !parseFloat(row['Total'])) continue
 
-    // Convert the line item into a Xero-compatible row
-    xeroRows.push({
-      'Date': moment(toptalRow['Transaction date'], 'MM-DD-YYYY HH:mm:ss').format('DD/MM/YYYY'),
-      'Amount': toptalRow['Amount'],
-      'Payee': '',
-      'Description': toptalRow['Description'],
-      'Reference': toptalRow['Id'],
-      'Cheque Number': ''
-    })
+    // Transactions with fees
+    if (parseFloat(row['Amount']) && parseFloat(row['Fee'])) {
+      xeroRows.push(convertRow(row, row['Amount'], row['Description']))
+      xeroRows.push(convertRow(row, row['Fee'], `${row['Description']} - Fee`))
+    }
 
-    // Catch embedded fees in line items and make a new entry for them
-    if (toptalRow['Fee']) xeroRows.push({
-      'Date': moment(toptalRow['Transaction date'], 'MM-DD-YYYY HH:mm:ss').format('DD/MM/YYYY'),
-      'Amount': toptalRow['Fee'],
-      'Payee': '',
-      'Description': `${toptalRow['Description']} - Fee`,
-      'Reference': toptalRow['Id'],
-      'Cheque Number': ''
-    })
+    // Transactions without fees
+    if (parseFloat(row['Amount']) && !parseFloat(row['Fee'])) xeroRows.push(convertRow(row, row['Amount'], row['Description']))
+
+    // Standalone fees
+    if (!parseFloat(row['Amount']) && parseFloat(row['Fee'])) xeroRows.push(convertRow(row, row['Fee'], row['Description']))
   }
+
   return xeroRows
 }
 
