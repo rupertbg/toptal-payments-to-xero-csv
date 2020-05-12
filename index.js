@@ -1,11 +1,13 @@
 const fs = require('fs')
+const xlsx = require('xlsx')
 const moment = require('moment')
 const parse = require('csv-parse/lib/sync')
 const stringify = require('csv-stringify/lib/sync')
 
 const DATA_DIR = 'data';
 const OUTPUT_DIR = 'output';
-const FILE_EXT = '.csv'
+const INPUT_FILE_EXT = '.xlsx'
+const OUTPUT_FILE_EXT = '.csv'
 
 function toptal2xero(toptalRow) {
   return {
@@ -19,14 +21,15 @@ function toptal2xero(toptalRow) {
 }
 
 fs.readdirSync(DATA_DIR).forEach(filename => {
-  if (filename.toLowerCase().endsWith(FILE_EXT)) {
+  if (filename.toLowerCase().endsWith(INPUT_FILE_EXT)) {
 
     // Read in file
-    const file = fs.readFileSync(`${__dirname}/${DATA_DIR}/${filename}`)
+    const file = xlsx.readFile(`${__dirname}/${DATA_DIR}/${filename}`)
+    const csv = xlsx.utils.sheet_to_csv(file.Sheets[file.SheetNames[0]])
     console.log(`Discovered ${filename}`)
 
     // Parse the CSV
-    let rows = parse(file, {
+    let rows = parse(csv, {
       columns: true,
       skip_empty_lines: true
     })
@@ -39,8 +42,9 @@ fs.readdirSync(DATA_DIR).forEach(filename => {
     const csvString = stringify(rows, {
       header: true
     })
-    fs.writeFileSync(`${__dirname}/${OUTPUT_DIR}/${filename}`, csvString)
-    console.log(`Wrote ${filename}`);
+    const outputFilename = `${filename.substring(0, filename.length - INPUT_FILE_EXT.length)}${OUTPUT_FILE_EXT}`
+    fs.writeFileSync(`${__dirname}/${OUTPUT_DIR}/${outputFilename}`, csvString)
+    console.log(`Wrote ${outputFilename}`);
 
   }
 });

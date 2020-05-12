@@ -1,3 +1,7 @@
+# Data
+data/*
+output/*
+
 # Logs
 logs
 *.log
@@ -86,3 +90,5 @@ typings/
 
 # DynamoDB Local files
 .dynamodb/
+
+.DS_Store

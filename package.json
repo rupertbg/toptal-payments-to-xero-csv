@@ -4,7 +4,7 @@
   "description": "Convert Toptal Payments CSV to Xero CSV",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node index.js"
   },
   "repository": {
     "type": "git",
@@ -19,6 +19,7 @@
   "dependencies": {
     "csv-parse": "^4.8.8",
     "csv-stringify": "^5.3.6",
-    "moment": "^2.24.0"
+    "moment": "^2.24.0",
+    "xlsx": "^0.16.0"
   }
 }
