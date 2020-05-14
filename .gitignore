@@ -1,6 +1,6 @@
 # Data
-data/*
-output/*
+data/*.xlsx
+output/*.csv
 
 # Logs
 logs
